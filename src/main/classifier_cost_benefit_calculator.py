@@ -1,9 +1,9 @@
 import pandas as pd
-from sklearn.metrics import confusion_matrix,roc_curve
+from sklearn.metrics import roc_curve
 
-def net_profit_curve(y_true,y_score,tp_gain,fp_cost,tn_gain=0.,fn_cost=0.):
+def net_benefit_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0.):
 
-    """Calculate net profit curve of a classifier for each possible cut-off, given a profit-cost matrix
+    """Calculate net benefit curve of a classifier for each possible threshold, given a profit-cost matrix
     associated with each element of the confusion matrix.
     
     Parameters
@@ -57,6 +57,6 @@ def net_profit_curve(y_true,y_score,tp_gain,fp_cost,tn_gain=0.,fn_cost=0.):
     # value of the threshold (to be used as index in the Pandas Series)
     tot_predicted_positives = (fp + tp)/size_population
 
-    net_profit_ = pd.Series(net_profit,index=tot_predicted_positives)
+    net_profit_series = pd.Series(net_profit,index=tot_predicted_positives)
 
-    return(net_profit_series)
+    return net_profit_series
