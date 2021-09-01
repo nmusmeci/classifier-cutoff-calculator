@@ -1,6 +1,6 @@
-# Classifier profit calculator
-Python library to calculate the expected net profit that will result from the application of a classifier in a commercial setting. The expected net profit is calculated for each value of the classifier's threshold (hence the output is a net profit curve).
+# Classifier cost-benefit calculator
+Python library to calculate the expected cost-benefit balance that will result from the application of a classifier in a commercial setting. 
 
-It can also be used to choose an optimal cut-off for the classifier that is problem-specific and has a clear business objective, as opposed to e.g. maximising F1 score.
+The idea is that there is a cost incurred when the classifier is wrong and a benefit (or profit) when the classifier is right. Given these costs and benefits, the library calculates the expected cost-benefit balance for each value of the classifier's threshold. It also calculates the threshold that maximizes the net benefit (i.e. total benefit - total cost), providing a problem-specific and business-driven solution to the question of finding the optimal cut-off for a classifier (as opposed to generic approaches such as maximizing F1 score).
 
-It takes as input a profit-cost matrix that quantifies the commercial impact for each one of the 4 cases in the confusion matrix (true positive, true negative, false positive and false negative). This profit-cost matrix does not come from the data but needs to be derived from the domain experts of the specific application. 
+Note: numerical values of costs and benefits do not come from the data but need to be derived from the domain experts of the specific application. 
