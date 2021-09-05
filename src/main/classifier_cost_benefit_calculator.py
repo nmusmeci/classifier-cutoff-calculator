@@ -32,7 +32,9 @@ def net_benefit_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0.)
         Series containing the net profit expected by using the classifier 
         as a function of the classifier's cut-off (Series' index is the proportion 
         of the total population classified as positive)
-        
+    optimal_threshold : float (range: 0-1)
+        Proportion of the total population classified as positive that yields
+        the highest net profit
     """
 
     # calculate total number of samples, total number of positive cases and
@@ -58,5 +60,6 @@ def net_benefit_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0.)
     tot_predicted_positives = (fp + tp)/size_population
 
     net_profit_series = pd.Series(net_profit,index=tot_predicted_positives)
+    optimal_threshold = net_profit_series.idxmax()
 
-    return net_profit_series
+    return [net_profit_series, optimal_threshold]
