@@ -1,10 +1,10 @@
 import pandas as pd
 from sklearn.metrics import roc_curve
 
-def net_benefit_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0.):
+def net_gain_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0.):
 
-    """Calculate net benefit curve of a classifier for each possible threshold, given a profit-cost matrix
-    associated with each element of the confusion matrix.
+    """Calculate net gain curve of a classifier for each possible threshold, 
+    given a gain-cost matrix associated with each element of the confusion matrix.
     
     Parameters
     ----------
@@ -28,13 +28,13 @@ def net_benefit_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0.)
             
     Returns
     -------
-    net_profit_series : Series, shape (,len(fpr))
-        Series containing the net profit expected by using the classifier 
+    expected_net_gain_series : Series, shape (,len(fpr))
+        Series containing the net gain expected by using the classifier 
         as a function of the classifier's cut-off (Series' index is the proportion 
         of the total population classified as positive)
     optimal_threshold : float (range: 0-1)
         Proportion of the total population classified as positive that yields
-        the highest net profit
+        the highest net gain
     """
     
     # calculate false and true positive rates for each threshold in the classifier
@@ -44,14 +44,14 @@ def net_benefit_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0.)
     tnr = 1. - fpr
     fnr = 1. - tpr
 
-    # use the complete confusion matrix to calculate expected net profit at
+    # use the complete confusion matrix to calculate expected net gain at
     # each threshold  
     net_profit = tpr*tp_gain + tnr*tn_gain - fpr*fp_cost - fnr*fn_cost
     # calculate percentage of total population that is classified as positive 
     # for each value of the threshold (to be used as index in the Pandas Series)
     tot_predicted_positives = fpr + tpr
 
-    net_profit_series = pd.Series(net_profit,index=tot_predicted_positives)
-    optimal_threshold = net_profit_series.idxmax()
+    expected_net_gain_series = pd.Series(net_profit,index=tot_predicted_positives)
+    optimal_threshold = expected_net_gain_series.idxmax()
 
-    return [net_profit_series, optimal_threshold]
+    return [expected_net_gain_series, optimal_threshold]
