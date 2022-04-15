@@ -1,7 +1,8 @@
 import pandas as pd
+import numpy as np
 from sklearn.metrics import roc_curve
 
-def net_gain_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0.):
+def net_gain_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0., p_1=None):
 
     """Calculate net gain curve of a classifier for each possible threshold, 
     given a gain-cost matrix associated with each element of the confusion matrix.
@@ -25,6 +26,10 @@ def net_gain_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0.):
     fn_cost: float, optional (default = 0.)
         Loss from incorrectly predicting that a positive data point is negative.
         It must be > 0. 
+    p_1: float, optional (default = None)
+        Prior for class 1 (positive class). If None, the function calculates it
+        from y_true. 
+        It must be between 0 and 1.
             
     Returns
     -------
@@ -43,15 +48,20 @@ def net_gain_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0.):
     # to get the complete confusion matrix at each threshold
     tnr = 1. - fpr
     fnr = 1. - tpr
+    
+    # if the prior for class 1 was not provided, calculate it from the test data
+    if p_1 is None:
+        p_1 = np.mean(y_true)
 
     # use the complete confusion matrix to calculate expected net gain at
     # each threshold  
-    net_profit = tpr*tp_gain + tnr*tn_gain - fpr*fp_cost - fnr*fn_cost
+    net_gain = p_1*(tpr*tp_gain - fnr*fn_cost) + \
+              (1. - p_1)*(tnr*tn_gain - fpr*fp_cost)
     # calculate percentage of total population that is classified as positive 
     # for each value of the threshold (to be used as index in the Pandas Series)
-    tot_predicted_positives = fpr + tpr
+    tot_predicted_positives = (1 - p_1)*fpr + p_1*tpr
 
-    expected_net_gain_series = pd.Series(net_profit,index=tot_predicted_positives)
+    expected_net_gain_series = pd.Series(net_gain,index=tot_predicted_positives)
     optimal_threshold = expected_net_gain_series.idxmax()
 
     return [expected_net_gain_series, optimal_threshold]
