@@ -36,28 +36,20 @@ def net_benefit_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0.)
         Proportion of the total population classified as positive that yields
         the highest net profit
     """
-
-    # calculate total number of samples, total number of positive cases and
-    # total number of negative cases
-    size_population = y_true.shape[0]
-    size_positives = sum(y_true==1)
-    size_negatives = sum(y_true==0)
     
     # calculate false and true positive rates for each threshold in the classifier
     fpr,tpr, _ = roc_curve(y_true,y_score)
-    # calculate false and true positive counts for each threshold from rates
-    fp = fpr*(size_negatives)
-    tp = tpr*(size_positives)
-    # derive true and false negative counts from false and true positive counts,
+    # derive true and false negative rates from false and true positive rates,
     # to get the complete confusion matrix at each threshold
-    tn = size_negatives - fp
-    fn = size_positives - tp
+    tnr = 1. - fpr
+    fnr = 1. - tpr
 
-    # use the complete confusion matrix to calculate net profit at each threshold  
-    net_profit = tp*tp_gain + tn*tn_gain - fp*fp_cost - fn*fn_cost
-    # calculate percentage of total population that is classified as positive for each
-    # value of the threshold (to be used as index in the Pandas Series)
-    tot_predicted_positives = (fp + tp)/size_population
+    # use the complete confusion matrix to calculate expected net profit at
+    # each threshold  
+    net_profit = tpr*tp_gain + tnr*tn_gain - fpr*fp_cost - fnr*fn_cost
+    # calculate percentage of total population that is classified as positive 
+    # for each value of the threshold (to be used as index in the Pandas Series)
+    tot_predicted_positives = fpr + tpr
 
     net_profit_series = pd.Series(net_profit,index=tot_predicted_positives)
     optimal_threshold = net_profit_series.idxmax()
