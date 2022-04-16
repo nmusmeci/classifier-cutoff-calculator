@@ -44,6 +44,7 @@ def net_gain_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0., p_
     
     # calculate false and true positive rates for each threshold in the classifier
     fpr,tpr, _ = roc_curve(y_true,y_score)
+    
     # derive true and false negative rates from false and true positive rates,
     # to get the complete confusion matrix at each threshold
     tnr = 1. - fpr
@@ -57,6 +58,7 @@ def net_gain_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0., p_
     # each threshold  
     net_gain = p_1*(tpr*tp_gain - fnr*fn_cost) + \
               (1. - p_1)*(tnr*tn_gain - fpr*fp_cost)
+              
     # calculate percentage of total population that is classified as positive 
     # for each value of the threshold (to be used as index in the Pandas Series)
     tot_predicted_positives = (1 - p_1)*fpr + p_1*tpr
