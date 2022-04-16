@@ -74,12 +74,19 @@ def net_gain_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0., p_
 
 def plot_net_gain_curve(expected_net_gain_series, figsize=(10,5)):
     
+    cutoff = expected_net_gain_series.idxmax()
+    max_net_gain = expected_net_gain_series.max()
+    
     fig,ax = plt.subplots(1,1,figsize=figsize)
     
-    expected_net_gain_series.plot(ax=ax)
+    expected_net_gain_series.plot(ax=ax,fontsize=12)
     ax.axhline(y=0, c='black', linestyle='--', linewidth=1)
+    ax.axvline(x=cutoff, c='black', linestyle=':', linewidth=1)
 
+    ax.set_title(f'Max net gain = {round(max_net_gain,1)}', fontsize=20)
     ax.set_xlim([0., 1.])
-    ax.set_xlabel("Fraction of cases classified as positive")
-    ax.set_ylabel("Expected net gain (per case)")
+    ax.set_xlabel("Fraction of cases classified as positive", fontsize=15)
+    ax.set_ylabel("Expected net gain (per case)", fontsize=15)
+    ax.annotate(f'Cut-off = {round(cutoff,2)}', 
+                (cutoff+cutoff*0.01, max_net_gain*0.1))
     
