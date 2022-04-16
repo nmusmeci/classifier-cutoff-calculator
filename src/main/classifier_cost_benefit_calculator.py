@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.metrics import roc_curve
+import matplotlib.pyplot as plt
 
 def net_gain_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0., p_1=None):
 
@@ -37,6 +38,8 @@ def net_gain_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0., p_
         Series containing the net gain expected by using the classifier 
         as a function of the classifier's cut-off (Series' index is the proportion 
         of the total population classified as positive)
+    expected_net_gain_max : float
+        Maximum expected net gain from the classifier
     optimal_threshold : float (range: 0-1)
         Proportion of the total population classified as positive that yields
         the highest net gain
@@ -64,6 +67,19 @@ def net_gain_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0., p_
     tot_predicted_positives = (1 - p_1)*fpr + p_1*tpr
 
     expected_net_gain_series = pd.Series(net_gain,index=tot_predicted_positives)
+    expected_net_gain_max = expected_net_gain_series.max()
     optimal_threshold = expected_net_gain_series.idxmax()
 
-    return [expected_net_gain_series, optimal_threshold]
+    return [expected_net_gain_series, expected_net_gain_max, optimal_threshold]
+
+def plot_net_gain_curve(expected_net_gain_series, figsize=(10,5)):
+    
+    fig,ax = plt.subplots(1,1,figsize=figsize)
+    
+    expected_net_gain_series.plot(ax=ax)
+    ax.axhline(y=0, c='black', linestyle='--', linewidth=1)
+
+    ax.set_xlim([0., 1.])
+    ax.set_xlabel("Fraction of cases classified as positive")
+    ax.set_ylabel("Expected net gain (per case)")
+    
