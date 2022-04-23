@@ -36,8 +36,8 @@ def net_gain_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0., p_
     -------
     expected_net_gain_series : Series, shape (,len(fpr))
         Series containing the net gain expected by using the classifier 
-        as a function of the classifier's cut-off (Series' index is the proportion 
-        of the total population classified as positive)
+        as a function of the classifier's cut-off (Series' index is the 
+        classifier's threshold')
     expected_net_gain_max : float
         Maximum expected net gain from the classifier
     optimal_threshold : float (range: 0-1)
@@ -46,7 +46,7 @@ def net_gain_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0., p_
     """
     
     # calculate false and true positive rates for each threshold in the classifier
-    fpr,tpr, _ = roc_curve(y_true,y_score)
+    fpr, tpr, thresholds = roc_curve(y_true,y_score)
     
     # derive true and false negative rates from false and true positive rates,
     # to get the complete confusion matrix at each threshold
@@ -62,11 +62,7 @@ def net_gain_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0., p_
     net_gain = p_1*(tpr*tp_gain - fnr*fn_cost) + \
               (1. - p_1)*(tnr*tn_gain - fpr*fp_cost)
               
-    # calculate percentage of total population that is classified as positive 
-    # for each value of the threshold (to be used as index in the Pandas Series)
-    tot_predicted_positives = (1 - p_1)*fpr + p_1*tpr
-
-    expected_net_gain_series = pd.Series(net_gain,index=tot_predicted_positives)
+    expected_net_gain_series = pd.Series(net_gain,index=thresholds)
     expected_net_gain_max = expected_net_gain_series.max()
     optimal_threshold = expected_net_gain_series.idxmax()
 
@@ -85,7 +81,7 @@ def plot_net_gain_curve(expected_net_gain_series, figsize=(10,5)):
 
     ax.set_title(f'Max net gain = {round(max_net_gain,1)}', fontsize=20)
     ax.set_xlim([0., 1.])
-    ax.set_xlabel("Fraction of cases classified as positive", fontsize=15)
+    ax.set_xlabel("Classifier's threshold", fontsize=15)
     ax.set_ylabel("Expected net gain (per case)", fontsize=15)
     ax.annotate(f'Cut-off = {round(cutoff,2)}', 
                 (cutoff+cutoff*0.01, max_net_gain*0.1))
