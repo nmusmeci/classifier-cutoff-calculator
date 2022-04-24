@@ -83,6 +83,8 @@ def plot_net_gain_curve(expected_net_gain_series, figsize=(10,5)):
     ax.set_xlim([0., 1.])
     ax.set_xlabel("Classifier's threshold", fontsize=15)
     ax.set_ylabel("Expected net gain (per case)", fontsize=15)
+    cutoff_annotation_offset = cutoff*0.01 \
+        if cutoff < expected_net_gain_series.mean() else -0.01*cutoff
     ax.annotate(f'Cut-off = {round(cutoff,2)}', 
-                (cutoff+cutoff*0.01, max_net_gain*0.1))
+                (cutoff+cutoff_annotation_offset, max_net_gain*0.1))
     
