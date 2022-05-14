@@ -5,16 +5,18 @@ import matplotlib.pyplot as plt
 
 def net_gain_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0., p_1=None):
 
-    """Calculate net gain curve of a classifier for each possible threshold, 
+    """Calculate net gain curve of a classifier for each possible cut-off, 
     given a gain-cost matrix associated with each element of the confusion matrix.
     
     Parameters
     ----------
     y_true : list or array of binary (1/0)
-        Real value of the target variable for each data point 
+        Real value of the target variable for each data point in a test set.
+        To avoid data likeage, this should not be the same as the training set.
     y_score : list or array of float, shape (,len(y_true))
-        Score assigned by the classifier to each data point (higher scores mean higher confidence 
-        in target variable being 1)
+        Score assigned by the classifier to each data point in a test set
+        (higher scores mean higher confidence in target variable being 1).
+        To avoid data likeage, this should not be the same as the training set.
     tp_gain: float
         Profit or gain from correctly prediciting that a positive data point is positive.
         It must be > 0.
@@ -35,21 +37,20 @@ def net_gain_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0., p_
     Returns
     -------
     expected_net_gain_series : Series, shape (,len(fpr))
-        Series containing the net gain expected by using the classifier 
+        Series containing the net gain expected when using the classifier 
         as a function of the classifier's cut-off (Series' index is the 
-        classifier's threshold')
+        classifier's cut-off)
     expected_net_gain_max : float
         Maximum expected net gain from the classifier
-    optimal_threshold : float (range: 0-1)
-        Proportion of the total population classified as positive that yields
-        the highest net gain
+    optimal_cutoff : float (range: 0-1)
+        Classifier's cut-off that yields the highest expected net gain
     """
     
-    # calculate false and true positive rates for each threshold in the classifier
-    fpr, tpr, thresholds = roc_curve(y_true,y_score)
+    # calculate false and true positive rates for each cut-off in the classifier
+    fpr, tpr, cutoff = roc_curve(y_true,y_score)
     
     # derive true and false negative rates from false and true positive rates,
-    # to get the complete confusion matrix at each threshold
+    # to get the complete confusion matrix at each cut-off
     tnr = 1. - fpr
     fnr = 1. - tpr
     
@@ -57,34 +58,48 @@ def net_gain_curve(y_true, y_score, tp_gain, fp_cost, tn_gain=0., fn_cost=0., p_
     if p_1 is None:
         p_1 = np.mean(y_true)
 
-    # use the complete confusion matrix to calculate expected net gain at
-    # each threshold  
+    # use the complete confusion matrix to calculate expected net gain for
+    # each cut-off  
     net_gain = p_1*(tpr*tp_gain - fnr*fn_cost) + \
               (1. - p_1)*(tnr*tn_gain - fpr*fp_cost)
               
-    expected_net_gain_series = pd.Series(net_gain,index=thresholds)
+    expected_net_gain_series = pd.Series(net_gain,index=cutoff)
     expected_net_gain_max = expected_net_gain_series.max()
-    optimal_threshold = expected_net_gain_series.idxmax()
+    optimal_cutoff = expected_net_gain_series.idxmax()
 
-    return [expected_net_gain_series, expected_net_gain_max, optimal_threshold]
+    return [expected_net_gain_series, expected_net_gain_max, optimal_cutoff]
 
 def plot_net_gain_curve(expected_net_gain_series, figsize=(10,5)):
     
-    cutoff = expected_net_gain_series.idxmax()
-    max_net_gain = expected_net_gain_series.max()
+    """
+    Plot the expected net gain for each value of the cut-off. Optimal cut-off
+    is also highlighted with a vertical line.
+    
+    Parameters
+    ----------
+    expected_net_gain_series: Series, shape (,len(fpr))
+        Series containing the net gain expected when using the classifier 
+        as a function of the classifier's cut-off. It is the output of function
+        net_gain_curve
+    figsize: tuple, optional (default=(10,5))
+        Size of the figure
+    """
+    
+    optimal_cutoff = expected_net_gain_series.idxmax()
+    expected_net_gain_max = expected_net_gain_series.max()
     
     fig,ax = plt.subplots(1,1,figsize=figsize)
     
     expected_net_gain_series.plot(ax=ax,fontsize=12)
     ax.axhline(y=0, c='black', linestyle='--', linewidth=1)
-    ax.axvline(x=cutoff, c='black', linestyle=':', linewidth=1)
+    ax.axvline(x=optimal_cutoff, c='black', linestyle=':', linewidth=1)
 
-    ax.set_title(f'Max net gain = {round(max_net_gain,1)}', fontsize=20)
+    ax.set_title(f'Max net gain = {round(expected_net_gain_max,1)}', fontsize=20)
     ax.set_xlim([0., 1.])
-    ax.set_xlabel("Classifier's threshold", fontsize=15)
+    ax.set_xlabel("Classifier's cut-off", fontsize=15)
     ax.set_ylabel("Expected net gain (per case)", fontsize=15)
-    cutoff_annotation_offset = cutoff*0.01 \
-        if cutoff < expected_net_gain_series.mean() else -0.01*cutoff
-    ax.annotate(f'Cut-off = {round(cutoff,2)}', 
-                (cutoff+cutoff_annotation_offset, max_net_gain*0.1))
+    cutoff_annotation_offset = optimal_cutoff*0.01 \
+        if optimal_cutoff < expected_net_gain_series.mean() else -0.01*optimal_cutoff
+    ax.annotate(f'Cut-off = {round(optimal_cutoff,2)}', 
+                (optimal_cutoff+cutoff_annotation_offset, expected_net_gain_max*0.1))
     
