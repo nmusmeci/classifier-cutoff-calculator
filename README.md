@@ -1,4 +1,4 @@
-# Classifier cost-benefit calculator
+# Classifier cost-gain calculator
 Python functions that calculate the expected <b>net gain</b> that will result from the application of a classifier in a commercial setting. 
 
 Whenever a classifier is used in a commercial setting there is a cost incurred when the classifier is wrong and a gain (or profit) when the classifier is right. For example, a classifier that identifies customers to include in a marketing email will generate a profit when it recommends a customer who ends up converting, and a cost when it recommends a customer who doesn't convert and actually ends up unsubscribing from future marketing emails.
