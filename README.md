@@ -1,5 +1,5 @@
-# Classifier cost-gain calculator
-Python functions that calculate the expected <b>net gain</b> that will result from the application of a classifier in a commercial setting. 
+# Classifier cut-off calculator
+Python class that calculates the optimal cut-off for a classifier based on a cost/benefit analysis. 
 
 ### Use case
 Whenever a classifier is used in a commercial setting there is a cost incurred when the classifier is wrong and a gain (or profit) when the classifier is right. For example, let us imagine a classifier trained to identify customers to include in a marketing email: such a model will generate a profit when it recommends a customer who ends up converting, but it will incur a cost when it recommends a customer who doesn't convert and unsubscribes from future marketing emails.
@@ -7,7 +7,7 @@ Whenever a classifier is used in a commercial setting there is a cost incurred w
 The functions in this repository make very easy to perform this cost-benefit calculation given a classifier.
 
 ### Overview
-The functions in this repo let the user calculate the expected net gain (i.e. total gain - total cost) for each value of the classifier's threshold. As inputs, the functions need a quantitative estimate of these costs and gains, as well as data about the classifier out-of-sample performance (y_true and y_score). They also calculate the threshold that maximizes the net gain, providing a <b>problem-specific and business-driven solution to the question of finding the optimal cut-off</b> for a classifier (as opposed to generic approaches such as maximizing F1 score): see screenshot below from the tutorial notebook.
+The functions in this repo let the user calculate the expected net gain (i.e. total gain - total cost) for each value of the classifier's threshold. As inputs, the class needs a quantitative estimate of these costs and gains, as well as data about the classifier out-of-sample performance (y_true and y_score). The class then calculates the threshold that maximizes the net gain, providing a <b>problem-specific and business-driven solution to the question of finding the optimal cut-off</b> for a classifier (as opposed to generic approaches such as maximizing F1 score): see screenshot below from the tutorial notebook.
 
 <img src="images/classifier_gain_plot.PNG"  width="500"/>
 
