@@ -72,6 +72,8 @@ class ClassifierCutoffCalculator:
         net_gain = self.p_1*(tpr*self.tp_gain - fnr*self.fn_cost) + (1. - self.p_1)*(tnr*self.tn_gain - fpr*self.fp_cost)
         self.expected_net_gain_series = pd.Series(net_gain,index=cutoff)
         
+        return self
+        
     def find_optimal_cutoff(self) -> None:
         """
         Find the optimal cut-off for the classifier.
@@ -82,6 +84,8 @@ class ClassifierCutoffCalculator:
         
         self.expected_net_gain_max = self.expected_net_gain_series.max()
         self.optimal_cutoff = self.expected_net_gain_series.idxmax()
+        
+        return self
     
     def plot_net_gain_curve(self, figsize: Tuple[int, int] = (10,5)) -> None:
         """
