@@ -58,10 +58,13 @@ class ClassifierCutoffCalculator:
         """
         Calculate the net gain curve for the classifier.
         
-        The net gain curve shows the expected net gain for each possible cut-off of the classifier.
-        The curve is calculated using a gain-cost matrix associated with each element of the confusion matrix.
+        The net gain curve shows the expected net gain for each possible 
+        cut-off of the classifier.
+        The curve is calculated using a gain-cost matrix associated with each 
+        element of the confusion matrix.
         
-        This method saves the resulting net gain curve as a class attribute for later use.
+        This method saves the resulting net gain curve as a class attribute
+        for later use.
         """
         
         fpr, tpr, cutoff = roc_curve(self.y_true, self.y_score)
@@ -69,7 +72,8 @@ class ClassifierCutoffCalculator:
         fnr = 1. - tpr
         if self.p_1 is None:
             self.p_1 = np.mean(self.y_true)
-        net_gain = self.p_1*(tpr*self.tp_gain - fnr*self.fn_cost) + (1. - self.p_1)*(tnr*self.tn_gain - fpr*self.fp_cost)
+        net_gain = self.p_1*(tpr*self.tp_gain - fnr*self.fn_cost) + \
+            (1. - self.p_1)*(tnr*self.tn_gain - fpr*self.fp_cost)
         self.expected_net_gain_series = pd.Series(net_gain,index=cutoff)
         
         return self
@@ -78,8 +82,10 @@ class ClassifierCutoffCalculator:
         """
         Find the optimal cut-off for the classifier.
         
-        The optimal cut-off is the value that maximizes the expected net gain for the classifier.
-        This method saves the maximum expected net gain and the optimal cut-off as class attributes for later use.
+        The optimal cut-off is the value that maximizes the expected net gain 
+        for the classifier.
+        This method saves the maximum expected net gain and the optimal 
+        cut-off as class attributes for later use.
         """
         
         self.expected_net_gain_max = self.expected_net_gain_series.max()
@@ -91,10 +97,13 @@ class ClassifierCutoffCalculator:
         """
         Plot the expected net gain curve for the classifier.
         
-        The net gain curve shows the expected net gain for each possible cut-off of the classifier.
-        The curve is calculated using a gain-cost matrix associated with each element of the confusion matrix.
+        The net gain curve shows the expected net gain for each possible 
+        cut-off of the classifier.
+        The curve is calculated using a gain-cost matrix associated with each 
+        element of the confusion matrix.
         
-        The optimal cut-off, as well as a horizontal line at y=0, are also highlighted in the plot.
+        The optimal cut-off, as well as a horizontal line at y=0, are also 
+        highlighted in the plot.
         
         Parameters
         ----------
@@ -104,7 +113,8 @@ class ClassifierCutoffCalculator:
         Raises
         ------
         ValueError
-            If the net gain curve has not been calculated yet (using the 'generate_net_gain_curve' method).
+            If the net gain curve has not been calculated yet (using the 
+            'generate_net_gain_curve' method).
         """
         
         if self.expected_net_gain_series is None:
@@ -117,11 +127,14 @@ class ClassifierCutoffCalculator:
         ax.axhline(y=0, c='black', linestyle='--', linewidth=1)
         ax.axvline(x=self.optimal_cutoff, c='black', linestyle=':', linewidth=1)
     
-        ax.set_title(f'Max net gain = {round(self.expected_net_gain_max,1)}', fontsize=20)
+        ax.set_title(f'Max net gain = {round(self.expected_net_gain_max,1)}',
+                     fontsize=20)
         ax.set_xlim([0., 1.])
         ax.set_xlabel("Classifier's cut-off", fontsize=15)
         ax.set_ylabel("Expected net gain (per case)", fontsize=15)
         cutoff_annotation_offset = self.optimal_cutoff*0.01 \
-            if self.optimal_cutoff < self.expected_net_gain_series.mean() else -0.01*self.optimal_cutoff
+            if self.optimal_cutoff < self.expected_net_gain_series.mean() \
+            else -0.01*self.optimal_cutoff
         ax.annotate(f'Cut-off = {round(self.optimal_cutoff,2)}', 
-                    (self.optimal_cutoff+cutoff_annotation_offset, self.expected_net_gain_max*0.1))
+                    (self.optimal_cutoff+cutoff_annotation_offset, 
+                     self.expected_net_gain_max*0.1))
